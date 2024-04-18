@@ -24,25 +24,34 @@
   
   // Function to fetch movies from the API
   const fetchMovies = () => {
-    fetch("/api/v1/movies", {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      movies.value = data.movies; // Assume the response has a "movies" key with the data
-    })
-    .catch(error => {
-      console.error('Failed to fetch movies:', error);
-    });
-  };
+  const token = localStorage.getItem('jwt_token'); // Retrieve the JWT token from storage
+
+  // Add a check to see if the token exists
+  if (!token) {
+    console.error('No JWT token found');
+    return; // Exit the function if the token isn't available
+  }
+
+  fetch("/api/v1/movies", {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`, // Include the JWT in the Authorization header
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    movies.value = data.movies; // Set the movies data from the response
+  })
+  .catch(error => {
+    console.error('Failed to fetch movies:', error);
+  });
+};
   
   // Fetch movies when component is mounted
   onMounted(fetchMovies);
