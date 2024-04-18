@@ -34,56 +34,72 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue';
-  
-  const movie = ref({
+import { ref } from 'vue';
+
+const movie = ref({
     title: '',
     description: '',
     poster: null,
-  });
-  const errors = ref({});
-  const successMessage = ref('');
-  const errorMessage = ref('');
-  
-  function handleFileUpload(event) {
+});
+const errors = ref({});
+const successMessage = ref('');
+const errorMessage = ref('');
+
+function handleFileUpload(event) {
     movie.value.poster = event.target.files[0];
+}
+
+function submitForm() {
+  let formData = new FormData();
+  formData.append('title', movie.value.title);
+  formData.append('description', movie.value.description);
+  formData.append('poster', movie.value.poster); // Ensure this is a File object
+
+  const token = localStorage.getItem('jwt_token'); // Retrieve the JWT token
+
+  if (!token) {
+    errorMessage.value = 'You are not logged in.';
+    return; // Exit the function if the token isn't there
   }
-  
-  function submitForm() {
-    let movieForm = document.getElementById('movieForm');
-    let formData = new FormData(movieForm);
-  
-    fetch("/api/v1/movies", {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Accept': 'application/json',
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Server responded with an error!');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.errors) {
-        errors.value = data.errors;
-        successMessage.value = '';
-        errorMessage.value = 'There was an error with your submission.';
-      } else {
-        successMessage.value = 'Movie added successfully!';
-        errorMessage.value = '';
-        movie.value = { title: '', description: '', poster: null }; // Reset the form
-        errors.value = {}; // Clear previous errors
-      }
-    })
-    .catch(error => {
-      errorMessage.value = error.message || 'An unexpected error occurred.';
+
+  fetch("/api/v1/movies", {
+    method: 'POST',
+    body: formData, // Send the form data
+    headers: {
+      // 'Content-Type' header will be set automatically by the browser for FormData
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`, // Include JWT in the Authorization header
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(data => {
+        throw new Error('Server responded with an error: ' + JSON.stringify(data));
+      });
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.errors) {
+      errors.value = data.errors;
       successMessage.value = '';
-    });
-  }
-  </script>
+      errorMessage.value = 'There was an error with your submission.';
+    } else {
+      successMessage.value = 'Movie added successfully!';
+      errorMessage.value = '';
+      movie.value = { title: '', description: '', poster: null }; // Reset the form
+      errors.value = {};
+    }
+  })
+  .catch(error => {
+    console.error('Request Failed:', error);
+    errorMessage.value = error.message || 'An unexpected error occurred.';
+    successMessage.value = '';
+  });
+}
+
+</script>
+
   
   <style scoped>
   /* Scoped CSS will apply to elements in this component only */

@@ -1,13 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AboutView from "../Pages/AboutView.vue";
 import HomeView from "../Pages/HomeView.vue";
-import AddMovieView from "../Pages/AddMovieView.vue"; // Import the AddMovieView component
-import MoviesView from "../Pages/MoviesView.vue"; // Import the MoviesView component
+import AddMovieView from "../Pages/AddMovieView.vue"; // Handles movie addition form
+import MoviesView from "../Pages/MoviesView.vue"; // Displays list of movies
+import LoginView from "../Pages/LoginView.vue"; // Handles user login
 
+// Define route configuration array
 const routes = [
     {
         path: '/',
-        name: 'Home', // It's good practice to name your routes
+        name: 'Home',
         component: HomeView
     },
     {
@@ -16,21 +18,28 @@ const routes = [
         component: AboutView
     },
     {
-        path: '/movies/create', // This route is for the movie creation page
+        path: '/movies/create', // Route for adding a new movie
         name: 'CreateMovie',
         component: AddMovieView
     },
     {
-        path: '/movies', // This route is for viewing the list of movies
+        path: '/movies', // Route for listing movies
         name: 'Movies',
         component: MoviesView
+    },
+    {
+        path: '/login', // Route for user login
+        name: 'Login',
+        component: LoginView
     }
-    // ... more routes can be added here
+    // Additional routes can be placed here
 ];
 
+// Create router instance with history mode and route definitions
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes
 });
 
+// Export router instance for use throughout the application
 export default router;
